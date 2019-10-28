@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Athos.Web.ViewModels
@@ -19,6 +20,9 @@ namespace Athos.Web.ViewModels
 
         public Guid CondominioId { get; set; }
 
+        public CondominioViewModel Condominio;
+
+        public IEnumerable<CondominioViewModel> Condominios { get; set; }
 
     }
 }

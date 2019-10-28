@@ -37,9 +37,11 @@ namespace Athos.Web.Controllers
             return View(user);
         }
 
-        public IActionResult Create()
+        public  IActionResult Create()
         {
-            return View();
+            var usuario = PopularCondominios(new UsuarioViewModel());
+
+            return View(usuario);
         }
 
         [HttpPost]
@@ -48,10 +50,13 @@ namespace Athos.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                //usuarioViewModel.Id = Guid.NewGuid();
-                //_context.Add(usuarioViewModel);
-                //await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
+                CustomResponse retorno = UsuarioService.Create(baseUri, usuarioViewModel);
+
+                if(retorno.Success == true)
+                {
+                    return RedirectToAction("Index");
+                }
+
             }
             return View(usuarioViewModel);
         }
@@ -66,44 +71,32 @@ namespace Athos.Web.Controllers
             CustomResponse retorno = UsuarioService.GetById(baseUri, id);
             UsuarioViewModel user = JsonConvert.DeserializeObject<UsuarioViewModel>(JsonConvert.SerializeObject(retorno.Data));
 
+            user = PopularCondominios(user);
+
             if (user == null)
             {
                 return NotFound();
             }
+
+
 
             return View(user);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("Id,Nome,Email,TipoUsuario,CondominioId")] UsuarioViewModel usuarioViewModel)
+        public IActionResult Edit([Bind("Id,Nome,Email,TipoUsuario,CondominioId")] UsuarioViewModel usuarioViewModel)
         {
-            if (id != usuarioViewModel.Id)
+            if (ModelState.IsValid)
             {
-                return NotFound();
-            }
+                CustomResponse retorno = UsuarioService.Update(baseUri, usuarioViewModel);
 
-            //if (ModelState.IsValid)
-            //{
-            //    try
-            //    {
-            //        _context.Update(usuarioViewModel);
-            //        await _context.SaveChangesAsync();
-            //    }
-            //    catch (DbUpdateConcurrencyException)
-            //    {
-            //        if (!UsuarioViewModelExists(usuarioViewModel.Id))
-            //        {
-            //            return NotFound();
-            //        }
-            //        else
-            //        {
-            //            throw;
-            //        }
-            //    }
-            //    return RedirectToAction(nameof(Index));
-            //}
-            return View();
+                if (retorno.Success == true)
+                {
+                    return RedirectToAction("Index");
+                }
+            }
+            return View(usuarioViewModel);
         }
 
         public IActionResult Delete(Guid id)
@@ -116,7 +109,6 @@ namespace Athos.Web.Controllers
             CustomResponse retorno = UsuarioService.GetById(baseUri, id);
             UsuarioViewModel user = JsonConvert.DeserializeObject<UsuarioViewModel>(JsonConvert.SerializeObject(retorno.Data));
 
-
             if (user == null)
             {
                 return NotFound();
@@ -125,7 +117,6 @@ namespace Athos.Web.Controllers
             return View(user);
         }
 
-        // POST: UsuarioViewModels/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(Guid id)
@@ -140,6 +131,21 @@ namespace Athos.Web.Controllers
         {
             return true;
             //return _context.UsuarioViewModel.Any(e => e.Id == id);
+        }
+
+        protected bool OperationValid()
+        {
+            return true;
+        }
+
+        private UsuarioViewModel PopularCondominios(UsuarioViewModel usuario)
+        {
+          CustomResponse retorno = CondominioService.GetAll(baseUri);
+
+            IEnumerable<CondominioViewModel> ListCondominio = JsonConvert.DeserializeObject<IEnumerable<CondominioViewModel>>(JsonConvert.SerializeObject(retorno.Data));
+
+            usuario.Condominios = ListCondominio;
+            return usuario;
         }
 
     }

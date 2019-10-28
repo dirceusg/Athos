@@ -16,10 +16,12 @@ namespace Athos.Web.ViewModels
         public string Nome { get; set; }
 
         public Guid AdministradoraId { get; set; }
+        public AdministradoraViewModel Administradora { get; set; }
 
         public UsuarioViewModel Responsavel { get; set; }
 
         public IEnumerable<UsuarioViewModel> Usuarios { get; set; }
+        public IEnumerable<AdministradoraViewModel> Administradoras { get; set; }
 
         public bool Ativo { get; set; }
         public bool Excluido { get; set; }

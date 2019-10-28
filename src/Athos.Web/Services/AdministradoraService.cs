@@ -1,7 +1,6 @@
 ﻿using Athos.Web.Models.Comunication;
 using Athos.Web.ViewModels;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Athos.Web.Services
 {
-    public static class UsuarioService
+    public static class AdministradoraService
     {
         public static CustomResponse GetAll(string baseUri)
         {
@@ -19,7 +18,7 @@ namespace Athos.Web.Services
 
             #region URL End Point
 
-            string action = "api/usuario";
+            string action = "api/administradora";
 
             #endregion
 
@@ -32,12 +31,12 @@ namespace Athos.Web.Services
             HttpResponseMessage response = HttpInstance.GetHttpClientInstance().SendAsync(request).Result;
             return JsonConvert.DeserializeObject<CustomResponse>(response.Content.ReadAsStringAsync().Result);
 
-       
+
             #endregion
 
         }
 
-        public static CustomResponse GetById(string baseUri,Guid id)
+        public static CustomResponse GetById(string baseUri, Guid id)
         {
             CustomResponse retorno = new CustomResponse();
 
@@ -45,7 +44,7 @@ namespace Athos.Web.Services
 
             #region URL End Point
 
-            string action = "api/usuario/" + id;
+            string action = "api/administradora/" + id;
 
             #endregion
 
@@ -69,13 +68,13 @@ namespace Athos.Web.Services
 
         }
 
-        public static CustomResponse Create(string baseUri, UsuarioViewModel usuario)
+        public static CustomResponse Create(string baseUri, AdministradoraViewModel administradora)
         {
             #region Request
 
             #region URL End Point
 
-            string action = "api/usuario";
+            string action = "api/administradora";
 
             #endregion
 
@@ -85,7 +84,7 @@ namespace Athos.Web.Services
 
             #region formBody
 
-            var json = JsonConvert.SerializeObject(usuario);
+            var json = JsonConvert.SerializeObject(administradora);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
 
@@ -100,13 +99,13 @@ namespace Athos.Web.Services
 
         }
 
-        public static CustomResponse Update(string baseUri, UsuarioViewModel usuario)
+        public static CustomResponse Update(string baseUri, AdministradoraViewModel administradora)
         {
             #region Request
 
             #region URL End Point
 
-            string action = "api/usuario/"+usuario.Id;
+            string action = "api/administradora/" + administradora.Id;
 
             #endregion
 
@@ -116,7 +115,7 @@ namespace Athos.Web.Services
 
             #region formBody
 
-            var json = JsonConvert.SerializeObject(usuario);
+            var json = JsonConvert.SerializeObject(administradora);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
 
@@ -131,36 +130,5 @@ namespace Athos.Web.Services
 
         }
 
-        public static CustomResponse GetByCondominio(string baseUri, Guid id)
-        {
-            CustomResponse retorno = new CustomResponse();
-
-            #region Request
-
-            #region URL End Point
-
-            string action = "api/usuario/" + id;
-
-            #endregion
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, baseUri + action);
-
-            #endregion
-
-            #region formPost
-
-
-
-            #endregion
-
-            #region Response
-
-            HttpResponseMessage response = HttpInstance.GetHttpClientInstance().SendAsync(request).Result;
-            return JsonConvert.DeserializeObject<CustomResponse>(response.Content.ReadAsStringAsync().Result);
-
-
-            #endregion
-
-        }
     }
 }

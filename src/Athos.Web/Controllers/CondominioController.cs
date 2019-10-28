@@ -2,92 +2,149 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Athos.Web.Models.Comunication;
+using Athos.Web.Services;
+using Athos.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Athos.Web.Controllers
 {
     public class CondominioController : Controller
     {
-        // GET: Condominio
-        public ActionResult Index()
+        private string baseUri = "https://localhost:44329/";
+
+        [HttpGet]
+        public IActionResult Index()
         {
-            return View();
+            CustomResponse retorno = CondominioService.GetAll(baseUri);
+
+            List<CondominioViewModel> ListUser = JsonConvert.DeserializeObject<List<CondominioViewModel>>(JsonConvert.SerializeObject(retorno.Data));
+
+            return View(ListUser);
         }
 
-        // GET: Condominio/Details/5
-        public ActionResult Details(int id)
+        [HttpGet]
+        public IActionResult Details(Guid id)
         {
-            return View();
+
+            CustomResponse retorno = CondominioService.GetById(baseUri, id);
+
+            CondominioViewModel user = JsonConvert.DeserializeObject<CondominioViewModel>(JsonConvert.SerializeObject(retorno.Data));
+
+            return View(user);
         }
 
-        // GET: Condominio/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
-            return View();
+            var Condominio = PopularAdministradoras(new CondominioViewModel());
+
+            return View(Condominio);
         }
 
-        // POST: Condominio/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public IActionResult Create([Bind("Id,Nome,AdminsitradoraId,Administradora,Responsavel,Ativo, Excluido")] CondominioViewModel CondominioViewModel)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // TODO: Add insert logic here
+                CustomResponse retorno = CondominioService.Create(baseUri, CondominioViewModel);
 
-                return RedirectToAction(nameof(Index));
+                if (retorno.Success == true)
+                {
+                    return RedirectToAction("Index");
+                }
+
             }
-            catch
-            {
-                return View();
-            }
+            return View(CondominioViewModel);
         }
 
-        // GET: Condominio/Edit/5
-        public ActionResult Edit(int id)
+        public IActionResult Edit(Guid id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            CustomResponse retorno = CondominioService.GetById(baseUri, id);
+            CondominioViewModel user = JsonConvert.DeserializeObject<CondominioViewModel>(JsonConvert.SerializeObject(retorno.Data));
+
+            user = PopularAdministradoras(user);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+
+
+            return View(user);
         }
 
-        // POST: Condominio/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public IActionResult Edit([Bind("Id,Nome,AdminsitradoraId,Administradora,Responsavel,Ativo, Excluido")] CondominioViewModel CondominioViewModel)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // TODO: Add update logic here
+                CustomResponse retorno = CondominioService.Update(baseUri, CondominioViewModel);
 
-                return RedirectToAction(nameof(Index));
+                if (retorno.Success == true)
+                {
+                    return RedirectToAction("Index");
+                }
             }
-            catch
-            {
-                return View();
-            }
+            return View(CondominioViewModel);
         }
 
-        // GET: Condominio/Delete/5
-        public ActionResult Delete(int id)
+        public IActionResult Delete(Guid id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            CustomResponse retorno = CondominioService.GetById(baseUri, id);
+            CondominioViewModel user = JsonConvert.DeserializeObject<CondominioViewModel>(JsonConvert.SerializeObject(retorno.Data));
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
         }
 
-        // POST: Condominio/Delete/5
-        [HttpPost]
+        [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public IActionResult DeleteConfirmed(Guid id)
         {
-            try
-            {
-                // TODO: Add delete logic here
+            //var CondominioViewModel = await _context.CondominioViewModel.FindAsync(id);
+            //_context.CondominioViewModel.Remove(CondominioViewModel);
+            //await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
 
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+        private bool CondominioViewModelExists(Guid id)
+        {
+            return true;
+            //return _context.CondominioViewModel.Any(e => e.Id == id);
+        }
+
+        protected bool OperationValid()
+        {
+            return true;
+        }
+
+        private CondominioViewModel PopularAdministradoras(CondominioViewModel Condominio)
+        {
+            CustomResponse retorno = AdministradoraService.GetAll(baseUri);
+
+            IEnumerable<AdministradoraViewModel> ListAdministradora = JsonConvert.DeserializeObject<IEnumerable<AdministradoraViewModel>>(JsonConvert.SerializeObject(retorno.Data));
+
+            Condominio.Administradoras = ListAdministradora;
+            return Condominio;
         }
     }
 }
